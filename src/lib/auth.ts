@@ -1,20 +1,23 @@
 import { cookies } from "next/headers";
 import { getPrisma } from "./prisma";
 
-const ADMIN_EMAIL = "admin@mixue.com";
-const ADMIN_PASSWORD = "admin123";
+const ADMIN_EMAIL = "starryjovanka@mixue.com";
+const ADMIN_PASSWORD = "Arcamanik109!";
 
-export async function hashPin(pin: string): Promise<string> {
+export async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder();
-  const data = encoder.encode(pin);
+  const data = encoder.encode(password);
   const hash = await crypto.subtle.digest("SHA-256", data);
   return Array.from(new Uint8Array(hash))
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
 }
 
-export async function verifyPin(pin: string, hashed: string): Promise<boolean> {
-  return (await hashPin(pin)) === hashed;
+export async function verifyPassword(
+  password: string,
+  hashed: string
+): Promise<boolean> {
+  return (await hashPassword(password)) === hashed;
 }
 
 export async function createWorkerSession(workerId: number) {

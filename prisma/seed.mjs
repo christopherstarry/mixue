@@ -14,23 +14,25 @@ if (!connectionString) {
 const sql = neon(connectionString);
 
 async function main() {
-  const pin1234 = createHash("sha256").update("1234").digest("hex");
-  const pin0000 = createHash("sha256").update("0000").digest("hex");
+  const passAhmad = createHash("sha256").update("ahmad123").digest("hex");
+  const passBudi = createHash("sha256").update("budi123").digest("hex");
 
   await sql`
-    INSERT INTO "Worker" (id, name, phone, pin, "isActive", "createdAt")
-    VALUES (1, 'Ahmad', '08123456789', ${pin1234}, true, NOW())
+    INSERT INTO "Worker" (id, name, username, password, "isActive", "createdAt")
+    VALUES (1, 'Ahmad', 'ahmad', ${passAhmad}, true, NOW())
     ON CONFLICT (id) DO NOTHING
   `;
 
   await sql`
-    INSERT INTO "Worker" (id, name, phone, pin, "isActive", "createdAt")
-    VALUES (2, 'Budi', '08198765432', ${pin0000}, true, NOW())
+    INSERT INTO "Worker" (id, name, username, password, "isActive", "createdAt")
+    VALUES (2, 'Budi', 'budi', ${passBudi}, true, NOW())
     ON CONFLICT (id) DO NOTHING
   `;
 
-  console.log("Seeded: Ahmad (PIN: 1234), Budi (PIN: 0000)");
-  console.log("Admin: admin@mixue.com / admin123");
+  console.log("Seeded:");
+  console.log("  Ahmad - username: ahmad, password: ahmad123");
+  console.log("  Budi  - username: budi,  password: budi123");
+  console.log("Admin: starryjovanka@mixue.com / Arcamanik109!");
 }
 
 main()

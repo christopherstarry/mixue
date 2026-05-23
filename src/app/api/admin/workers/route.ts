@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
-import { getAdminSession, hashPin } from "@/lib/auth";
+import { getAdminSession, hashPassword } from "@/lib/auth";
 
-export async function GET(req: Request) {
+export async function GET() {
   try {
     const prisma = await getPrisma();
     if (!(await getAdminSession())) {
@@ -26,34 +26,27 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, phone, pin } = await req.json();
+    const { name, username, password } = await req.json();
 
-    if (!name || !phone || !pin) {
+    if (!name || !username || !password) {
       return NextResponse.json(
-        { error: "Name, phone, and PIN are required" },
+        { error: "Name, username, and password are required" },
         { status: 400 }
       );
     }
 
-    if (pin.length < 4) {
-      return NextResponse.json(
-        { error: "PIN must be at least 4 digits" },
-        { status: 400 }
-      );
-    }
-
-    const existing = await prisma.worker.findFirst({ where: { phone } });
+    const existing = await prisma.worker.findUnique({ where: { username } });
     if (existing) {
       return NextResponse.json(
-        { error: "Worker with this phone already exists" },
+        { error: "Username already taken" },
         { status: 400 }
       );
     }
 
-    const hashedPin = await hashPin(pin);
+    const hashed = await hashPassword(password);
 
     const worker = await prisma.worker.create({
-      data: { name, phone, pin: hashedPin },
+      data: { name, username, password: hashed },
     });
 
     return NextResponse.json({ success: true, worker });
@@ -69,20 +62,14 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, name, phone, pin, isActive } = await req.json();
+    const { id, name, username, password, isActive } = await req.json();
 
     const data: any = {};
     if (name) data.name = name;
-    if (phone) data.phone = phone;
+    if (username) data.username = username;
     if (isActive !== undefined) data.isActive = isActive;
-    if (pin) {
-      if (pin.length < 4) {
-        return NextResponse.json(
-          { error: "PIN must be at least 4 digits" },
-          { status: 400 }
-        );
-      }
-      data.pin = await hashPin(pin);
+    if (password) {
+      data.password = await hashPassword(password);
     }
 
     const worker = await prisma.worker.update({

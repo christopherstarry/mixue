@@ -50,7 +50,7 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
               placeholder="admin@mixue.com"
               required
             />
@@ -62,8 +62,8 @@ export default function AdminLoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-              placeholder="admin123"
+              className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
+              placeholder="Enter password"
               required
             />
           </div>
@@ -82,7 +82,7 @@ export default function AdminLoginPage() {
         </form>
 
         <div className="text-center mt-4">
-          <a href="/" className="text-sm text-gray-400 hover:text-gray-600 underline">
+          <a href="/" className="text-sm text-gray-500 hover:text-gray-700 underline">
             Worker Login
           </a>
         </div>

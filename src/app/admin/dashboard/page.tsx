@@ -21,7 +21,7 @@ interface Attendance {
   clockOutPhoto: string | null;
   clockOutLat: number | null;
   clockOutLng: number | null;
-  worker: { id: number; name: string; phone: string };
+  worker: { id: number; name: string; username: string };
 }
 
 export default function AdminDashboardPage() {
@@ -109,7 +109,7 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-5xl mx-auto">
+      <main className="p-4 max-w-6xl mx-auto">
         <div className="bg-white rounded-2xl shadow p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-end">
             <div>
@@ -175,22 +175,23 @@ export default function AdminDashboardPage() {
             <table className="w-full bg-white rounded-2xl shadow overflow-hidden">
               <thead>
                 <tr className="bg-gray-100 text-left">
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Date</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Worker</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Clock In</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Photo In</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Clock Out</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Photo Out</th>
-                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Hours</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Date</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Worker</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Clock In</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Photo In</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Clock Out</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Photo Out</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Hours</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Location</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {attendances.map((a) => (
                   <tr key={a.id} className="hover:bg-gray-50 text-sm text-gray-800">
-                    <td className="px-4 py-3 whitespace-nowrap">{formatDate(a.date)}</td>
-                    <td className="px-4 py-3 font-medium">{a.worker.name}</td>
-                    <td className="px-4 py-3">{formatDateTime(a.clockInAt)}</td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3 whitespace-nowrap">{formatDate(a.date)}</td>
+                    <td className="px-3 py-3 font-medium">{a.worker.name}</td>
+                    <td className="px-3 py-3">{formatDateTime(a.clockInAt)}</td>
+                    <td className="px-3 py-3">
                       <button
                         onClick={() =>
                           setExpandedPhoto(
@@ -202,10 +203,10 @@ export default function AdminDashboardPage() {
                         View
                       </button>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3">
                       {a.clockOutAt ? formatDateTime(a.clockOutAt) : "-"}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="px-3 py-3">
                       {a.clockOutPhoto ? (
                         <button
                           onClick={() =>
@@ -221,7 +222,21 @@ export default function AdminDashboardPage() {
                         "-"
                       )}
                     </td>
-                    <td className="px-4 py-3">{calcHours(a.clockInAt, a.clockOutAt)}</td>
+                    <td className="px-3 py-3">{calcHours(a.clockInAt, a.clockOutAt)}</td>
+                    <td className="px-3 py-3 text-xs text-gray-500">
+                      {a.clockInLat && a.clockInLng ? (
+                        <a
+                          href={`https://www.google.com/maps?q=${a.clockInLat},${a.clockInLng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-blue-600 hover:text-blue-800 underline"
+                        >
+                          {a.clockInLat.toFixed(4)}, {a.clockInLng.toFixed(4)}
+                        </a>
+                      ) : (
+                        "-"
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>

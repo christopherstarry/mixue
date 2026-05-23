@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { getAuthenticatedWorker } from "@/lib/auth";
+import { todayDate, nowInTimezone } from "@/lib/date";
 
 export async function POST(req: Request) {
   try {
@@ -10,7 +11,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const today = new Date().toISOString().split("T")[0];
+    const today = todayDate();
+
+    const alreadyDone = await prisma.attendance.findFirst({
+      where: { workerId: worker.id, date: today, clockOutAt: { not: null } },
+    });
+
+    if (alreadyDone) {
+      return NextResponse.json(
+        { error: "You already clocked in and out today. Cannot clock in again." },
+        { status: 400 }
+      );
+    }
 
     const existing = await prisma.attendance.findFirst({
       where: { workerId: worker.id, clockOutAt: null },
@@ -18,7 +30,9 @@ export async function POST(req: Request) {
 
     if (existing) {
       return NextResponse.json(
-        { error: `You already clocked in on ${existing.date} and haven't clocked out. Please clock out first.` },
+        {
+          error: `You clocked in on ${existing.date} and haven't clocked out. Please clock out first.`,
+        },
         { status: 400 }
       );
     }
@@ -44,7 +58,7 @@ export async function POST(req: Request) {
         clockInPhoto: dataUrl,
         clockInLat: lat,
         clockInLng: lng,
-        clockInAt: new Date(),
+        clockInAt: nowInTimezone(),
       },
     });
 

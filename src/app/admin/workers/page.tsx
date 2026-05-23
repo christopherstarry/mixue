@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 interface Worker {
   id: number;
   name: string;
-  phone: string;
+  username: string;
   isActive: boolean;
   createdAt: string;
 }
@@ -18,8 +18,8 @@ export default function WorkersPage() {
   const [showForm, setShowForm] = useState(false);
   const [editing, setEditing] = useState<Worker | null>(null);
   const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [pin, setPin] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -46,8 +46,8 @@ export default function WorkersPage() {
   const openAdd = () => {
     setEditing(null);
     setName("");
-    setPhone("");
-    setPin("");
+    setUsername("");
+    setPassword("");
     setError("");
     setShowForm(true);
   };
@@ -55,8 +55,8 @@ export default function WorkersPage() {
   const openEdit = (w: Worker) => {
     setEditing(w);
     setName(w.name);
-    setPhone(w.phone);
-    setPin("");
+    setUsername(w.username);
+    setPassword("");
     setError("");
     setShowForm(true);
   };
@@ -68,12 +68,12 @@ export default function WorkersPage() {
 
     try {
       const method = editing ? "PUT" : "POST";
-      const body: any = { name, phone };
+      const body: any = { name, username };
       if (editing) {
         body.id = editing.id;
-        if (pin) body.pin = pin;
+        if (password) body.password = password;
       } else {
-        body.pin = pin;
+        body.password = password;
       }
 
       const res = await fetch("/api/admin/workers", {
@@ -121,13 +121,13 @@ export default function WorkersPage() {
         <div className="flex gap-3 items-center">
           <a
             href="/admin/dashboard"
-            className="text-sm text-blue-500 hover:text-blue-700"
+            className="text-sm text-blue-600 hover:text-blue-800"
           >
             Dashboard
           </a>
           <button
             onClick={() => router.push("/admin/login")}
-            className="text-sm text-gray-400 hover:text-red-500"
+            className="text-sm text-gray-500 hover:text-red-600"
           >
             Logout
           </button>
@@ -148,7 +148,7 @@ export default function WorkersPage() {
         {showForm && (
           <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-2xl p-6 w-full max-w-sm">
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
                 {editing ? "Edit Worker" : "Add Worker"}
               </h3>
               <form onSubmit={handleSave}>
@@ -158,30 +158,29 @@ export default function WorkersPage() {
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
                     required
                   />
                 </div>
                 <div className="mb-3">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
                   <input
-                    type="tel"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
                     required
                   />
                 </div>
                 <div className="mb-4">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    PIN {editing && "(leave blank to keep current)"}
+                    Password {editing && "(leave blank to keep current)"}
                   </label>
                   <input
                     type="password"
-                    value={pin}
-                    onChange={(e) => setPin(e.target.value)}
-                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                    maxLength={6}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
                     required={!editing}
                   />
                 </div>
@@ -212,7 +211,7 @@ export default function WorkersPage() {
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading...</div>
         ) : workers.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-gray-500">
             No workers yet. Add your first worker.
           </div>
         ) : (
@@ -222,32 +221,32 @@ export default function WorkersPage() {
                 key={w.id}
                 className="bg-white rounded-xl shadow-sm p-4 flex items-center justify-between"
               >
-                <div>
+                <div className="flex-1">
                   <p className={`font-medium ${w.isActive ? "text-gray-800" : "text-gray-400 line-through"}`}>
                     {w.name}
                   </p>
-                  <p className="text-sm text-gray-500">{w.phone}</p>
+                  <p className="text-sm text-gray-500">@{w.username}</p>
                 </div>
                 <div className="flex gap-2 items-center">
                   <button
                     onClick={() => toggleActive(w)}
-                    className={`text-xs px-3 py-1 rounded-full ${
+                    className={`text-xs px-3 py-1 rounded-full font-medium ${
                       w.isActive
-                        ? "bg-green-100 text-green-700"
-                        : "bg-gray-100 text-gray-500"
+                        ? "bg-green-100 text-green-700 hover:bg-green-200"
+                        : "bg-gray-100 text-gray-500 hover:bg-gray-200"
                     }`}
                   >
                     {w.isActive ? "Active" : "Inactive"}
                   </button>
                   <button
                     onClick={() => openEdit(w)}
-                    className="text-sm text-blue-500 hover:text-blue-700"
+                    className="text-sm text-blue-600 hover:text-blue-800"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => handleDelete(w.id)}
-                    className="text-sm text-red-500 hover:text-red-700"
+                    className="text-sm text-red-600 hover:text-red-800"
                   >
                     Delete
                   </button>

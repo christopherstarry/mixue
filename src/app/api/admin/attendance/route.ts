@@ -38,7 +38,7 @@ export async function GET(req: Request) {
 
     const attendances = await prisma.attendance.findMany({
       where,
-      include: { worker: { select: { id: true, name: true, phone: true } } },
+      include: { worker: { select: { id: true, name: true, username: true } } },
       orderBy: [{ date: "desc" }, { clockInAt: "desc" }],
     });
 

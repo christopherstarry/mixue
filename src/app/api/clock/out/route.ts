@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { getAuthenticatedWorker } from "@/lib/auth";
+import { nowInTimezone } from "@/lib/date";
 
 export async function POST(req: Request) {
   try {
@@ -39,7 +40,7 @@ export async function POST(req: Request) {
     await prisma.attendance.update({
       where: { id: attendance.id },
       data: {
-        clockOutAt: new Date(),
+        clockOutAt: nowInTimezone(),
         clockOutPhoto: dataUrl,
         clockOutLat: lat,
         clockOutLng: lng,

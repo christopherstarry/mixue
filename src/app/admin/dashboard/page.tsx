@@ -80,9 +80,14 @@ export default function AdminDashboardPage() {
 
   const calcHours = (inAt: string, outAt: string | null) => {
     if (!outAt) return "-";
-    const diff = new Date(outAt).getTime() - new Date(inAt).getTime();
-    const hours = Math.floor(diff / 3600000);
-    const mins = Math.floor((diff % 3600000) / 60000);
+    const t1 = new Date(inAt).getTime();
+    const t2 = new Date(outAt).getTime();
+    if (isNaN(t1) || isNaN(t2)) return "-";
+    const diff = t2 - t1;
+    if (diff < 0) return "-";
+    const totalMins = Math.round(diff / 60000);
+    const hours = Math.floor(totalMins / 60);
+    const mins = totalMins % 60;
     return `${hours}h ${mins}m`;
   };
 

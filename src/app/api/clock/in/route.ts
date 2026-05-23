@@ -13,12 +13,12 @@ export async function POST(req: Request) {
     const today = new Date().toISOString().split("T")[0];
 
     const existing = await prisma.attendance.findFirst({
-      where: { workerId: worker.id, date: today, clockOutAt: null },
+      where: { workerId: worker.id, clockOutAt: null },
     });
 
     if (existing) {
       return NextResponse.json(
-        { error: "Already clocked in today. Please clock out first." },
+        { error: `You already clocked in on ${existing.date} and haven't clocked out. Please clock out first.` },
         { status: 400 }
       );
     }

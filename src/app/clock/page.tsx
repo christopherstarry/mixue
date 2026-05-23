@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 export default function ClockPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isClockedIn, setIsClockedIn] = useState<boolean | null>(null);
+  const [hasOpenClockIn, setHasOpenClockIn] = useState<boolean | null>(null);
   const [clockInAt, setClockInAt] = useState<string | null>(null);
   const [workerName, setWorkerName] = useState("");
   const [loading, setLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function ClockPage() {
         return;
       }
       const data = await res.json();
-      setIsClockedIn(data.isClockedIn);
+      setHasOpenClockIn(data.hasOpenClockIn);
       setWorkerName(data.workerName);
       if (data.clockInAt) {
         setClockInAt(new Date(data.clockInAt).toLocaleTimeString());
@@ -110,7 +110,7 @@ export default function ClockPage() {
     router.push("/");
   };
 
-  if (isClockedIn === null) {
+  if (hasOpenClockIn === null) {
     return (
       <div className="min-h-screen bg-orange-50 flex items-center justify-center">
         <p className="text-gray-500">Loading...</p>
@@ -136,9 +136,11 @@ export default function ClockPage() {
       <main className="flex-1 p-4 flex flex-col items-center">
         <div className="bg-white rounded-2xl shadow p-6 w-full max-w-sm mb-4 text-center">
           <p className="text-4xl font-mono font-bold text-gray-800">{clockTime}</p>
-          <p className="text-sm text-gray-400 mt-1">
-            {isClockedIn ? `Clocked in at ${clockInAt}` : "Not clocked in"}
-          </p>
+          {clockInAt && (
+            <p className="text-sm text-gray-400 mt-1">
+              Clocked in at {clockInAt}
+            </p>
+          )}
         </div>
 
         {message && (
@@ -203,23 +205,22 @@ export default function ClockPage() {
           </p>
         )}
 
-        {isClockedIn ? (
-          <button
-            onClick={() => handleClockAction("out")}
-            disabled={!photoPreview || loading}
-            className="w-full max-w-sm bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white py-4 rounded-xl font-bold text-lg transition"
-          >
-            {loading ? "Processing..." : "Clock Out"}
-          </button>
-        ) : (
+        <div className="w-full max-w-sm flex gap-3">
           <button
             onClick={() => handleClockAction("in")}
             disabled={!photoPreview || loading}
-            className="w-full max-w-sm bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-4 rounded-xl font-bold text-lg transition"
+            className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-4 rounded-xl font-bold text-lg transition"
           >
-            {loading ? "Processing..." : "Clock In"}
+            {loading ? "..." : "Clock In"}
           </button>
-        )}
+          <button
+            onClick={() => handleClockAction("out")}
+            disabled={!photoPreview || loading}
+            className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white py-4 rounded-xl font-bold text-lg transition"
+          >
+            {loading ? "..." : "Clock Out"}
+          </button>
+        </div>
       </main>
     </div>
   );

@@ -10,15 +10,14 @@ export async function GET() {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const today = new Date().toISOString().split("T")[0];
-
-    const active = await prisma.attendance.findFirst({
-      where: { workerId: worker.id, date: today, clockOutAt: null },
+    const open = await prisma.attendance.findFirst({
+      where: { workerId: worker.id, clockOutAt: null },
+      orderBy: { clockInAt: "desc" },
     });
 
     return NextResponse.json({
-      isClockedIn: !!active,
-      clockInAt: active?.clockInAt || null,
+      hasOpenClockIn: !!open,
+      clockInAt: open?.clockInAt || null,
       workerName: worker.name,
     });
   } catch {

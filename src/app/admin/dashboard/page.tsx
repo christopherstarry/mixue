@@ -96,13 +96,13 @@ export default function AdminDashboardPage() {
         <div className="flex gap-3 items-center">
           <a
             href="/admin/workers"
-            className="text-sm text-blue-500 hover:text-blue-700"
+            className="text-sm text-blue-600 hover:text-blue-800"
           >
             Manage Workers
           </a>
           <button
             onClick={handleLogout}
-            className="text-sm text-gray-400 hover:text-red-500"
+            className="text-sm text-gray-500 hover:text-red-600"
           >
             Logout
           </button>
@@ -113,11 +113,11 @@ export default function AdminDashboardPage() {
         <div className="bg-white rounded-2xl shadow p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-end">
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Month</label>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">Month</label>
               <select
                 value={month}
                 onChange={(e) => setMonth(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white"
               >
                 {Array.from({ length: 12 }, (_, i) => (
                   <option key={i + 1} value={String(i + 1).padStart(2, "0")}>
@@ -127,11 +127,11 @@ export default function AdminDashboardPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Year</label>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">Year</label>
               <select
                 value={year}
                 onChange={(e) => setYear(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white"
               >
                 {[2025, 2026, 2027].map((y) => (
                   <option key={y} value={String(y)}>
@@ -141,11 +141,11 @@ export default function AdminDashboardPage() {
               </select>
             </div>
             <div>
-              <label className="block text-xs text-gray-500 mb-1">Worker</label>
+              <label className="block text-xs text-gray-600 mb-1 font-medium">Worker</label>
               <select
                 value={workerId}
                 onChange={(e) => setWorkerId(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                className="border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-800 bg-white"
               >
                 <option value="all">All Workers</option>
                 {workers.map((w) => (
@@ -167,7 +167,7 @@ export default function AdminDashboardPage() {
         {loading ? (
           <div className="text-center py-8 text-gray-500">Loading...</div>
         ) : attendances.length === 0 ? (
-          <div className="text-center py-8 text-gray-400">
+          <div className="text-center py-8 text-gray-500">
             No attendance records found for this period.
           </div>
         ) : (
@@ -175,18 +175,18 @@ export default function AdminDashboardPage() {
             <table className="w-full bg-white rounded-2xl shadow overflow-hidden">
               <thead>
                 <tr className="bg-gray-100 text-left">
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Date</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Worker</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Clock In</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Photo In</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Clock Out</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Photo Out</th>
-                  <th className="px-4 py-3 text-xs font-medium text-gray-600">Hours</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Date</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Worker</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Clock In</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Photo In</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Clock Out</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Photo Out</th>
+                  <th className="px-4 py-3 text-xs font-semibold text-gray-700">Hours</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {attendances.map((a) => (
-                  <tr key={a.id} className="hover:bg-gray-50 text-sm">
+                  <tr key={a.id} className="hover:bg-gray-50 text-sm text-gray-800">
                     <td className="px-4 py-3 whitespace-nowrap">{formatDate(a.date)}</td>
                     <td className="px-4 py-3 font-medium">{a.worker.name}</td>
                     <td className="px-4 py-3">{formatDateTime(a.clockInAt)}</td>
@@ -197,7 +197,7 @@ export default function AdminDashboardPage() {
                             expandedPhoto === a.clockInPhoto ? null : a.clockInPhoto
                           )
                         }
-                        className="text-blue-500 hover:text-blue-700 text-xs underline"
+                        className="text-blue-600 hover:text-blue-800 text-xs underline"
                       >
                         View
                       </button>
@@ -213,7 +213,7 @@ export default function AdminDashboardPage() {
                               expandedPhoto === a.clockOutPhoto ? null : a.clockOutPhoto
                             )
                           }
-                          className="text-blue-500 hover:text-blue-700 text-xs underline"
+                          className="text-blue-600 hover:text-blue-800 text-xs underline"
                         >
                           View
                         </button>

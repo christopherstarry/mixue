@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaLibSql } from "@prisma/adapter-libsql";
+import { PrismaNeon } from "@prisma/adapter-neon";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient;
@@ -9,13 +9,12 @@ const globalForPrisma = globalThis as unknown as {
 let prisma: PrismaClient;
 
 async function initPrisma() {
-  const url = process.env.TURSO_DATABASE_URL || "file:./dev.db";
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const connectionString =
+    process.env.DATABASE_URL ||
+    process.env.POSTGRES_URL ||
+    process.env.NEON_DATABASE_URL;
 
-  const config: any = { url };
-  if (authToken) config.authToken = authToken;
-
-  const adapter = new PrismaLibSql(config);
+  const adapter = new PrismaNeon({ connectionString: connectionString || "postgresql://" });
   prisma = new PrismaClient({ adapter });
 
   if (process.env.NODE_ENV !== "production") {

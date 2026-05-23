@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Worker {
+  id        Int           @id @default(autoincrement())
+  name      String
+  phone     String
+  pin       String
+  isActive  Boolean       @default(true)
+  createdAt DateTime      @default(now())
+  attendances Attendance[]
+}
+
+model Attendance {
+  id            Int       @id @default(autoincrement())
+  workerId      Int
+  date          String
+  clockInAt     DateTime  @default(now())
+  clockInPhoto  String
+  clockInLat    Float?
+  clockInLng    Float?
+  clockOutAt    DateTime?
+  clockOutPhoto String?
+  clockOutLat   Float?
+  clockOutLng   Float?
+  worker        Worker    @relation(fields: [workerId], references: [id])
+
+  @@index([workerId])
+  @@index([date])
+}

@@ -50,8 +50,9 @@ export async function POST(req: Request) {
     });
 
     return NextResponse.json({ success: true, worker });
-  } catch {
-    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  } catch (e) {
+    console.error("Add worker error:", e);
+    return NextResponse.json({ error: "Gagal menambahkan worker" }, { status: 500 });
   }
 }
 

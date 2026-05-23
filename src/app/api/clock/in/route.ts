@@ -33,19 +33,15 @@ export async function POST(req: Request) {
     }
 
     const buffer = Buffer.from(await photo.arrayBuffer());
-    const filename = `clock_in_${worker.id}_${Date.now()}.jpg`;
-
-    const { writeFile, mkdir } = await import("fs/promises");
-    const path = await import("path");
-    const uploadDir = path.join(process.cwd(), "public", "uploads");
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(uploadDir, filename), buffer);
+    const base64 = buffer.toString("base64");
+    const mimeType = photo.type || "image/jpeg";
+    const dataUrl = `data:${mimeType};base64,${base64}`;
 
     await prisma.attendance.create({
       data: {
         workerId: worker.id,
         date: today,
-        clockInPhoto: `/uploads/${filename}`,
+        clockInPhoto: dataUrl,
         clockInLat: lat,
         clockInLng: lng,
         clockInAt: new Date(),

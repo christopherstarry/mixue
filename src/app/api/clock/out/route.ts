@@ -18,7 +18,7 @@ export async function POST(req: Request) {
 
     if (!attendance) {
       return NextResponse.json(
-        { error: "No active clock-in found. Please clock in first." },
+        { error: "Belum ada absen masuk. Silakan absen masuk dulu." },
         { status: 400 }
       );
     }
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
 
     if (!photo) {
-      return NextResponse.json({ error: "Photo is required" }, { status: 400 });
+      return NextResponse.json({ error: "Foto wajib diambil" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await photo.arrayBuffer());
@@ -47,7 +47,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, message: "Clocked out successfully" });
+    return NextResponse.json({ success: true, message: "Absen pulang berhasil" });
   } catch (error) {
     console.error("Clock out error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

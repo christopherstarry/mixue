@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
     if (!username || !password) {
       return NextResponse.json(
-        { error: "Username and password are required" },
+        { error: "Username dan password wajib diisi" },
         { status: 400 }
       );
     }

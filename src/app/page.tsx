@@ -26,10 +26,10 @@ export default function WorkerLoginPage() {
         router.push("/clock");
       } else {
         const data = await res.json();
-        setError(data.error || "Invalid credentials");
+        setError(data.error || "Username atau password salah");
       }
     } catch {
-      setError("Connection error. Please try again.");
+      setError("Gagal terhubung. Silakan coba lagi.");
     } finally {
       setLoading(false);
     }
@@ -39,8 +39,9 @@ export default function WorkerLoginPage() {
     <div className="min-h-screen bg-orange-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-2xl shadow-lg p-8 w-full max-w-sm">
         <div className="text-center mb-8">
+          <div className="text-4xl mb-2">🍦</div>
           <h1 className="text-2xl font-bold text-orange-600">Mixue</h1>
-          <p className="text-gray-500 text-sm mt-1">Attendance</p>
+          <p className="text-gray-500 text-sm mt-1">Absensi Karyawan</p>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -53,7 +54,7 @@ export default function WorkerLoginPage() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
-              placeholder="Enter your username"
+              placeholder="Masukkan username"
               required
             />
           </div>
@@ -67,7 +68,7 @@ export default function WorkerLoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
-              placeholder="Enter your password"
+              placeholder="Masukkan password"
               required
             />
           </div>
@@ -81,7 +82,7 @@ export default function WorkerLoginPage() {
             disabled={loading}
             className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-3 rounded-xl font-semibold transition"
           >
-            {loading ? "Logging in..." : "Login"}
+            {loading ? "Masuk..." : "Masuk"}
           </button>
         </form>
 
@@ -90,7 +91,7 @@ export default function WorkerLoginPage() {
             href="/admin/login"
             className="text-sm text-gray-400 hover:text-gray-600 underline"
           >
-            Admin Login
+            Admin
           </a>
         </div>
       </div>

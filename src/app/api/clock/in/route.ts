@@ -19,7 +19,7 @@ export async function POST(req: Request) {
 
     if (alreadyDone) {
       return NextResponse.json(
-        { error: "You already clocked in and out today. Cannot clock in again." },
+        { error: "Kamu sudah absen masuk dan pulang hari ini." },
         { status: 400 }
       );
     }
@@ -31,7 +31,7 @@ export async function POST(req: Request) {
     if (existing) {
       return NextResponse.json(
         {
-          error: `You clocked in on ${existing.date} and haven't clocked out. Please clock out first.`,
+          error: `Kamu sudah absen masuk pada ${existing.date} dan belum absen pulang. Silakan absen pulang dulu.`,
         },
         { status: 400 }
       );
@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
 
     if (!photo) {
-      return NextResponse.json({ error: "Photo is required" }, { status: 400 });
+      return NextResponse.json({ error: "Foto wajib diambil" }, { status: 400 });
     }
 
     const buffer = Buffer.from(await photo.arrayBuffer());
@@ -62,7 +62,7 @@ export async function POST(req: Request) {
       },
     });
 
-    return NextResponse.json({ success: true, message: "Clocked in successfully" });
+    return NextResponse.json({ success: true, message: "Absen masuk berhasil" });
   } catch (error) {
     console.error("Clock in error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

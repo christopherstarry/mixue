@@ -226,9 +226,7 @@ export default function AdminDashboardPage() {
                     <td className="px-3 py-3 text-xs text-gray-500">
                       {a.clockInLat && a.clockInLng ? (
                         <a
-                          href={`https://www.google.com/maps?q=${a.clockInLat},${a.clockInLng}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
+                          href={`geo:${a.clockInLat},${a.clockInLng}`}
                           className="text-blue-600 hover:text-blue-800 underline"
                         >
                           {a.clockInLat.toFixed(4)}, {a.clockInLng.toFixed(4)}

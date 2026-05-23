@@ -68,7 +68,7 @@ export default function ClockPage() {
 
   const handleClockAction = async (action: "in" | "out") => {
     if (!photoFile) {
-      setMessage({ type: "error", text: "Please take a photo first" });
+      setMessage({ type: "error", text: "Harap foto selfie terlebih dahulu" });
       return;
     }
 
@@ -99,7 +99,7 @@ export default function ClockPage() {
         setMessage({ type: "error", text: data.error });
       }
     } catch {
-      setMessage({ type: "error", text: "Connection error" });
+      setMessage({ type: "error", text: "Gagal terhubung" });
     } finally {
       setLoading(false);
     }
@@ -113,7 +113,7 @@ export default function ClockPage() {
   if (hasOpenClockIn === null) {
     return (
       <div className="min-h-screen bg-orange-50 flex items-center justify-center">
-        <p className="text-gray-500">Loading...</p>
+        <p className="text-gray-500">Memuat...</p>
       </div>
     );
   }
@@ -122,14 +122,14 @@ export default function ClockPage() {
     <div className="min-h-screen bg-orange-50 flex flex-col">
       <header className="bg-white shadow-sm p-4 flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-orange-600">Mixue</h1>
-          <p className="text-sm text-gray-500">Welcome, {workerName}</p>
+          <div className="flex items-center gap-2">
+            <span className="text-xl">🍦</span>
+            <h1 className="text-lg font-bold text-orange-600">Mixue</h1>
+          </div>
+          <p className="text-sm text-gray-500">Halo, {workerName}</p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="text-sm text-gray-400 hover:text-red-500"
-        >
-          Logout
+        <button onClick={handleLogout} className="text-sm text-gray-400 hover:text-red-500">
+          Keluar
         </button>
       </header>
 
@@ -138,7 +138,7 @@ export default function ClockPage() {
           <p className="text-4xl font-mono font-bold text-gray-800">{clockTime}</p>
           {clockInAt && (
             <p className="text-sm text-gray-400 mt-1">
-              Clocked in at {clockInAt}
+                {hasOpenClockIn ? `Masuk jam ${clockInAt}` : "Belum absen masuk"}
             </p>
           )}
         </div>
@@ -157,7 +157,7 @@ export default function ClockPage() {
 
         <div className="bg-white rounded-2xl shadow p-6 w-full max-w-sm mb-4">
           <h2 className="text-sm font-medium text-gray-700 mb-3 text-center">
-            {photoPreview ? "Photo taken" : "Take a selfie"}
+            {photoPreview ? "Foto sudah diambil" : "Ambil foto selfie"}
           </h2>
 
           <div className="aspect-video bg-gray-100 rounded-xl overflow-hidden mb-3 flex items-center justify-center">
@@ -185,7 +185,7 @@ export default function ClockPage() {
               onClick={openCamera}
               className="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl font-medium transition"
             >
-              Open Camera
+              Buka Kamera
             </button>
           )}
 
@@ -194,14 +194,14 @@ export default function ClockPage() {
               onClick={openCamera}
               className="w-full bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-xl font-medium transition text-sm"
             >
-              Retake
+              Foto Ulang
             </button>
           )}
         </div>
 
         {location && (
           <p className="text-xs text-gray-400 mb-4">
-            Location: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
+            Lokasi: {location.lat.toFixed(6)}, {location.lng.toFixed(6)}
           </p>
         )}
 
@@ -211,14 +211,14 @@ export default function ClockPage() {
             disabled={!photoPreview || loading}
             className="flex-1 bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white py-4 rounded-xl font-bold text-lg transition"
           >
-            {loading ? "..." : "Clock In"}
+            {loading ? "..." : "Absen Masuk"}
           </button>
           <button
             onClick={() => handleClockAction("out")}
             disabled={!photoPreview || loading}
             className="flex-1 bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white py-4 rounded-xl font-bold text-lg transition"
           >
-            {loading ? "..." : "Clock Out"}
+            {loading ? "..." : "Absen Pulang"}
           </button>
         </div>
       </main>

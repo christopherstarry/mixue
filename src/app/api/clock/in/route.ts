@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { getAuthenticatedWorker } from "@/lib/auth";
-import { todayDate, nowInTimezone } from "@/lib/date";
 
 export async function POST(req: Request) {
   try {
@@ -11,7 +10,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
     }
 
-    const today = todayDate();
+    const formData = await req.formData();
+    const photo = formData.get("photo") as File;
+    const timestamp = formData.get("timestamp") as string;
+    const lat = formData.get("lat") ? parseFloat(formData.get("lat") as string) : null;
+    const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
+
+    if (!photo) {
+      return NextResponse.json({ error: "Foto wajib diambil" }, { status: 400 });
+    }
+
+    const clockTime = timestamp ? new Date(timestamp) : new Date();
+    const today = clockTime.toISOString().split("T")[0];
 
     const alreadyDone = await prisma.attendance.findFirst({
       where: { workerId: worker.id, date: today, clockOutAt: { not: null } },
@@ -37,15 +47,6 @@ export async function POST(req: Request) {
       );
     }
 
-    const formData = await req.formData();
-    const photo = formData.get("photo") as File;
-    const lat = formData.get("lat") ? parseFloat(formData.get("lat") as string) : null;
-    const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
-
-    if (!photo) {
-      return NextResponse.json({ error: "Foto wajib diambil" }, { status: 400 });
-    }
-
     const buffer = Buffer.from(await photo.arrayBuffer());
     const base64 = buffer.toString("base64");
     const mimeType = photo.type || "image/jpeg";
@@ -58,7 +59,7 @@ export async function POST(req: Request) {
         clockInPhoto: dataUrl,
         clockInLat: lat,
         clockInLng: lng,
-        clockInAt: nowInTimezone(),
+        clockInAt: clockTime,
       },
     });
 

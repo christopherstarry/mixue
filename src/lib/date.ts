@@ -9,8 +9,3 @@ export function todayDate(): string {
   });
   return formatter.format(new Date());
 }
-
-export function nowInTimezone(): Date {
-  const str = new Date().toLocaleString("en-US", { timeZone: TIMEZONE });
-  return new Date(str);
-}

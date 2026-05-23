@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { getAuthenticatedWorker } from "@/lib/auth";
-import { nowInTimezone } from "@/lib/date";
 
 export async function POST(req: Request) {
   try {
@@ -25,6 +24,7 @@ export async function POST(req: Request) {
 
     const formData = await req.formData();
     const photo = formData.get("photo") as File;
+    const timestamp = formData.get("timestamp") as string;
     const lat = formData.get("lat") ? parseFloat(formData.get("lat") as string) : null;
     const lng = formData.get("lng") ? parseFloat(formData.get("lng") as string) : null;
 
@@ -40,7 +40,7 @@ export async function POST(req: Request) {
     await prisma.attendance.update({
       where: { id: attendance.id },
       data: {
-        clockOutAt: nowInTimezone(),
+        clockOutAt: timestamp ? new Date(timestamp) : new Date(),
         clockOutPhoto: dataUrl,
         clockOutLat: lat,
         clockOutLng: lng,

@@ -76,6 +76,7 @@ export default function ClockPage() {
     try {
       const formData = new FormData();
       formData.append("photo", photoFile);
+      formData.append("timestamp", new Date().toISOString());
       if (location) {
         formData.append("lat", String(location.lat));
         formData.append("lng", String(location.lng));

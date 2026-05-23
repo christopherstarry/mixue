@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaNeon } from "@prisma/adapter-neon";
+import { PrismaNeonHttp } from "@prisma/adapter-neon";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient;
@@ -14,7 +14,10 @@ async function initPrisma() {
     process.env.POSTGRES_URL ||
     process.env.NEON_DATABASE_URL;
 
-  const adapter = new PrismaNeon({ connectionString: connectionString || "postgresql://" });
+  const adapter = new PrismaNeonHttp(connectionString || "", {
+    arrayMode: false,
+    fullResults: false,
+  });
   prisma = new PrismaClient({ adapter });
 
   if (process.env.NODE_ENV !== "production") {

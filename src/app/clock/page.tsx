@@ -60,8 +60,26 @@ export default function ClockPage() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhotoFile(file);
     setPhotoPreview(URL.createObjectURL(file));
+
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement("canvas");
+      const maxW = 800;
+      let w = img.width;
+      let h = img.height;
+      if (w > maxW) { h = h * maxW / w; w = maxW; }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { setPhotoFile(file); return; }
+      ctx.drawImage(img, 0, 0, w, h);
+      canvas.toBlob((blob) => {
+        if (!blob) { setPhotoFile(file); return; }
+        setPhotoFile(new File([blob], "selfie.jpg", { type: "image/jpeg" }));
+      }, "image/jpeg", 0.7);
+    };
+    img.src = URL.createObjectURL(file);
   };
 
   const handleClockAction = async (action: "in" | "out") => {

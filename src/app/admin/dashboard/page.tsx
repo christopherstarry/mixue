@@ -9,11 +9,9 @@ import {
   formatLateness,
   formatScheduledStart,
   payLabel,
-  shiftLabel,
   statusLabel,
   type AttendanceStatus,
   type PayStatus,
-  type ShiftType,
 } from "@/lib/attendance-rules";
 
 interface Worker {
@@ -33,7 +31,6 @@ interface Attendance {
   clockOutPhoto: string | null;
   clockOutLat: number | null;
   clockOutLng: number | null;
-  shiftType: ShiftType;
   scheduledStartAt: string;
   latenessSeconds: number;
   attendanceStatus: AttendanceStatus;
@@ -197,7 +194,6 @@ export default function AdminDashboardPage() {
                 <tr className="bg-gray-100 text-left">
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Date</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Worker</th>
-                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Shift</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Schedule</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Clock In</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Photo In</th>
@@ -217,11 +213,8 @@ export default function AdminDashboardPage() {
                       {formatJakartaDateWithDay(a.date)}
                     </td>
                     <td className="px-3 py-3 font-medium">{a.worker.name}</td>
-                    <td className="px-3 py-3 whitespace-nowrap">
-                      {shiftLabel(a.shiftType)}
-                    </td>
                     <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
-                      {formatScheduledStart(new Date(a.scheduledStartAt))}
+                      {formatScheduledStart(a.scheduledStartAt)}
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
                       {formatJakartaTime(a.clockInAt)}

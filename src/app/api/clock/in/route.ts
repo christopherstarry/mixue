@@ -64,7 +64,6 @@ export async function POST(req: Request) {
         clockInLat: lat,
         clockInLng: lng,
         clockInAt: clockTime,
-        shiftType: evaluation.shiftType,
         scheduledStartAt: evaluation.scheduledStartAt,
         latenessSeconds: evaluation.latenessSeconds,
         attendanceStatus: evaluation.attendanceStatus,

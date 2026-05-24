@@ -3,12 +3,17 @@ const TIMEZONE = "Asia/Jakarta";
 const TOLERANCE_SECONDS = 15 * 60;
 const ABSENT_AFTER_SECONDS = 30 * 60;
 
-export type ShiftType = "morning" | "afternoon";
+const MORNING_START_SECONDS = 9 * 3600;
+const MORNING_LATE_END_SECONDS = MORNING_START_SECONDS + ABSENT_AFTER_SECONDS; // 09:30:00
+const MORNING_ABSENT_AT_SECONDS = MORNING_START_SECONDS + ABSENT_AFTER_SECONDS + 1; // 09:30:01
+const WEEKDAY_AFTERNOON_START_SECONDS = 14 * 3600;
+const WEEKEND_EARLY_START_SECONDS = 14 * 3600;
+const WEEKEND_AFTERNOON_START_SECONDS = 15 * 3600;
+
 export type AttendanceStatus = "on_time" | "late" | "absent";
 export type PayStatus = "full_day" | "half_day" | "unpaid";
 
 export interface AttendanceEvaluation {
-  shiftType: ShiftType;
   scheduledStartAt: Date;
   latenessSeconds: number;
   attendanceStatus: AttendanceStatus;
@@ -62,27 +67,7 @@ function secondsSinceMidnight(hours: number, minutes: number, seconds: number): 
   return hours * 3600 + minutes * 60 + seconds;
 }
 
-function getAfternoonStartHour(isWeekend: boolean): number {
-  return isWeekend ? 15 : 14;
-}
-
-export function evaluateAttendance(clockInAt: Date): AttendanceEvaluation {
-  const dateStr = jakartaDateString(clockInAt);
-  const weekend = isWeekendInJakarta(clockInAt);
-  const { hours, minutes, seconds } = jakartaTimeParts(clockInAt);
-  const clockInSeconds = secondsSinceMidnight(hours, minutes, seconds);
-
-  const afternoonStartHour = getAfternoonStartHour(weekend);
-  const afternoonStartSeconds = secondsSinceMidnight(afternoonStartHour, 0, 0);
-
-  const shiftType: ShiftType =
-    clockInSeconds >= afternoonStartSeconds ? "afternoon" : "morning";
-
-  const scheduledStartAt =
-    shiftType === "morning"
-      ? jakartaDateTime(dateStr, 9, 0, 0)
-      : jakartaDateTime(dateStr, afternoonStartHour, 0, 0);
-
+function evaluateLateness(clockInAt: Date, scheduledStartAt: Date): AttendanceEvaluation {
   const latenessSeconds = Math.max(
     0,
     Math.floor((clockInAt.getTime() - scheduledStartAt.getTime()) / 1000)
@@ -100,12 +85,61 @@ export function evaluateAttendance(clockInAt: Date): AttendanceEvaluation {
   }
 
   return {
-    shiftType,
     scheduledStartAt,
     latenessSeconds,
     attendanceStatus,
     payStatus,
   };
+}
+
+function selectScheduledStart(clockInAt: Date, weekend: boolean): Date {
+  const dateStr = jakartaDateString(clockInAt);
+  const { hours, minutes, seconds } = jakartaTimeParts(clockInAt);
+  const clockInSeconds = secondsSinceMidnight(hours, minutes, seconds);
+
+  // Morning window: evaluate against 09:00 through 09:30:00 (late) and 09:30:01 (absent)
+  if (
+    clockInSeconds <= MORNING_LATE_END_SECONDS ||
+    clockInSeconds === MORNING_ABSENT_AT_SECONDS
+  ) {
+    return jakartaDateTime(dateStr, 9, 0, 0);
+  }
+
+  const afternoonStartSeconds = weekend
+    ? WEEKEND_AFTERNOON_START_SECONDS
+    : WEEKDAY_AFTERNOON_START_SECONDS;
+
+  // Weekend: 14:00 through 15:15:00 is early/on-time for the 15:00 window
+  if (
+    weekend &&
+    clockInSeconds >= WEEKEND_EARLY_START_SECONDS &&
+    clockInSeconds < afternoonStartSeconds
+  ) {
+    return jakartaDateTime(dateStr, 15, 0, 0);
+  }
+
+  // Weekday: between morning absent cutoff and 14:00 is early for the 14:00 window
+  if (
+    !weekend &&
+    clockInSeconds > MORNING_ABSENT_AT_SECONDS &&
+    clockInSeconds < WEEKDAY_AFTERNOON_START_SECONDS
+  ) {
+    return jakartaDateTime(dateStr, 14, 0, 0);
+  }
+
+  // At or after the afternoon start
+  return jakartaDateTime(
+    dateStr,
+    weekend ? 15 : 14,
+    0,
+    0
+  );
+}
+
+export function evaluateAttendance(clockInAt: Date): AttendanceEvaluation {
+  const weekend = isWeekendInJakarta(clockInAt);
+  const scheduledStartAt = selectScheduledStart(clockInAt, weekend);
+  return evaluateLateness(clockInAt, scheduledStartAt);
 }
 
 export function formatJakartaTime(date: Date | string): string {
@@ -138,9 +172,9 @@ export function formatDuration(inAt: Date | string, outAt: Date | string | null)
   const totalSeconds = Math.floor((t2 - t1) / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
+  const secs = totalSeconds % 60;
 
-  return `${hours}h ${minutes}m ${String(seconds).padStart(2, "0")}s`;
+  return `${hours}h ${minutes}m ${String(secs).padStart(2, "0")}s`;
 }
 
 export function formatLateness(seconds: number): string {
@@ -157,12 +191,8 @@ export function formatLateness(seconds: number): string {
   return `${secs}s`;
 }
 
-export function formatScheduledStart(scheduledStartAt: Date): string {
+export function formatScheduledStart(scheduledStartAt: Date | string): string {
   return formatJakartaTime(scheduledStartAt);
-}
-
-export function shiftLabel(shiftType: ShiftType): string {
-  return shiftType === "morning" ? "Morning" : "Afternoon";
 }
 
 export function statusLabel(status: AttendanceStatus): string {
@@ -189,27 +219,6 @@ export function payLabel(payStatus: PayStatus): string {
 
 export function resolveAttendanceFields(attendance: {
   clockInAt: Date | string;
-  shiftType?: string | null;
-  scheduledStartAt?: Date | string | null;
-  latenessSeconds?: number | null;
-  attendanceStatus?: string | null;
-  payStatus?: string | null;
 }): AttendanceEvaluation {
-  if (
-    attendance.shiftType &&
-    attendance.scheduledStartAt != null &&
-    attendance.latenessSeconds != null &&
-    attendance.attendanceStatus &&
-    attendance.payStatus
-  ) {
-    return {
-      shiftType: attendance.shiftType as ShiftType,
-      scheduledStartAt: new Date(attendance.scheduledStartAt),
-      latenessSeconds: attendance.latenessSeconds,
-      attendanceStatus: attendance.attendanceStatus as AttendanceStatus,
-      payStatus: attendance.payStatus as PayStatus,
-    };
-  }
-
   return evaluateAttendance(new Date(attendance.clockInAt));
 }

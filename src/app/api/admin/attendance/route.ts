@@ -56,7 +56,6 @@ export async function GET(req: Request) {
       const fields = resolveAttendanceFields(a);
       return {
         ...a,
-        shiftType: fields.shiftType,
         scheduledStartAt: fields.scheduledStartAt.toISOString(),
         latenessSeconds: fields.latenessSeconds,
         attendanceStatus: fields.attendanceStatus,

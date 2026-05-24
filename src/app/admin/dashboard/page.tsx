@@ -2,11 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import {
+  formatDuration,
+  formatJakartaDateWithDay,
+  formatJakartaTime,
+  formatLateness,
+  formatScheduledStart,
+  payLabel,
+  shiftLabel,
+  statusLabel,
+  type AttendanceStatus,
+  type PayStatus,
+  type ShiftType,
+} from "@/lib/attendance-rules";
 
 interface Worker {
   id: number;
   name: string;
-  phone: string;
 }
 
 interface Attendance {
@@ -21,7 +33,34 @@ interface Attendance {
   clockOutPhoto: string | null;
   clockOutLat: number | null;
   clockOutLng: number | null;
+  shiftType: ShiftType;
+  scheduledStartAt: string;
+  latenessSeconds: number;
+  attendanceStatus: AttendanceStatus;
+  payStatus: PayStatus;
   worker: { id: number; name: string; username: string };
+}
+
+function statusBadgeClass(status: AttendanceStatus): string {
+  switch (status) {
+    case "on_time":
+      return "bg-green-100 text-green-700";
+    case "late":
+      return "bg-yellow-100 text-yellow-800";
+    case "absent":
+      return "bg-red-100 text-red-700";
+  }
+}
+
+function payBadgeClass(payStatus: PayStatus): string {
+  switch (payStatus) {
+    case "full_day":
+      return "bg-green-50 text-green-700 border border-green-200";
+    case "half_day":
+      return "bg-orange-50 text-orange-700 border border-orange-200";
+    case "unpaid":
+      return "bg-red-50 text-red-700 border border-red-200";
+  }
 }
 
 export default function AdminDashboardPage() {
@@ -34,10 +73,6 @@ export default function AdminDashboardPage() {
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedPhoto, setExpandedPhoto] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetchAttendance();
-  }, []);
 
   const fetchAttendance = async () => {
     setLoading(true);
@@ -59,36 +94,16 @@ export default function AdminDashboardPage() {
     }
   };
 
+  useEffect(() => {
+    const startup = window.setTimeout(() => {
+      fetchAttendance();
+    }, 0);
+    return () => window.clearTimeout(startup);
+  }, []);
+
   const handleLogout = async () => {
     await fetch("/api/admin/login/logout", { method: "POST" });
     router.push("/admin/login");
-  };
-
-  const formatDateTime = (dt: string) => {
-    return new Date(dt).toLocaleString("id-ID", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatDate = (dt: string) => {
-    return new Date(dt + "T00:00:00").toLocaleDateString("id-ID", {
-      day: "numeric",
-      month: "short",
-    });
-  };
-
-  const calcHours = (inAt: string, outAt: string | null) => {
-    if (!outAt) return "-";
-    const t1 = new Date(inAt).getTime();
-    const t2 = new Date(outAt).getTime();
-    if (isNaN(t1) || isNaN(t2)) return "-";
-    const diff = t2 - t1;
-    if (diff < 0) return "-";
-    const totalMins = Math.round(diff / 60000);
-    const hours = Math.floor(totalMins / 60);
-    const mins = totalMins % 60;
-    return `${hours}h ${mins}m`;
   };
 
   return (
@@ -114,7 +129,7 @@ export default function AdminDashboardPage() {
         </div>
       </header>
 
-      <main className="p-4 max-w-6xl mx-auto">
+      <main className="p-4 max-w-7xl mx-auto">
         <div className="bg-white rounded-2xl shadow p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-end">
             <div>
@@ -177,25 +192,40 @@ export default function AdminDashboardPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full bg-white rounded-2xl shadow overflow-hidden">
+            <table className="w-full bg-white rounded-2xl shadow overflow-hidden min-w-[1200px]">
               <thead>
                 <tr className="bg-gray-100 text-left">
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Date</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Worker</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Shift</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Schedule</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Clock In</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Photo In</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Clock Out</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Photo Out</th>
-                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Hours</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Total Hours</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Late</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Status</th>
+                  <th className="px-3 py-3 text-xs font-semibold text-gray-700">Pay</th>
                   <th className="px-3 py-3 text-xs font-semibold text-gray-700">Location</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {attendances.map((a) => (
                   <tr key={a.id} className="hover:bg-gray-50 text-sm text-gray-800">
-                    <td className="px-3 py-3 whitespace-nowrap">{formatDate(a.date)}</td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {formatJakartaDateWithDay(a.date)}
+                    </td>
                     <td className="px-3 py-3 font-medium">{a.worker.name}</td>
-                    <td className="px-3 py-3">{formatDateTime(a.clockInAt)}</td>
+                    <td className="px-3 py-3 whitespace-nowrap">
+                      {shiftLabel(a.shiftType)}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
+                      {formatScheduledStart(new Date(a.scheduledStartAt))}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
+                      {formatJakartaTime(a.clockInAt)}
+                    </td>
                     <td className="px-3 py-3">
                       <button
                         onClick={() =>
@@ -208,8 +238,8 @@ export default function AdminDashboardPage() {
                         View
                       </button>
                     </td>
-                    <td className="px-3 py-3">
-                      {a.clockOutAt ? formatDateTime(a.clockOutAt) : "-"}
+                    <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
+                      {a.clockOutAt ? formatJakartaTime(a.clockOutAt) : "-"}
                     </td>
                     <td className="px-3 py-3">
                       {a.clockOutPhoto ? (
@@ -227,7 +257,26 @@ export default function AdminDashboardPage() {
                         "-"
                       )}
                     </td>
-                    <td className="px-3 py-3">{calcHours(a.clockInAt, a.clockOutAt)}</td>
+                    <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
+                      {formatDuration(a.clockInAt, a.clockOutAt)}
+                    </td>
+                    <td className="px-3 py-3 whitespace-nowrap font-mono text-xs">
+                      {formatLateness(a.latenessSeconds)}
+                    </td>
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${statusBadgeClass(a.attendanceStatus)}`}
+                      >
+                        {statusLabel(a.attendanceStatus)}
+                      </span>
+                    </td>
+                    <td className="px-3 py-3">
+                      <span
+                        className={`inline-block px-2 py-1 rounded-full text-xs font-medium ${payBadgeClass(a.payStatus)}`}
+                      >
+                        {payLabel(a.payStatus)}
+                      </span>
+                    </td>
                     <td className="px-3 py-3 text-xs text-gray-500">
                       {a.clockInLat && a.clockInLng ? (
                         <a

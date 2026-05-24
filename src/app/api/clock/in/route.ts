@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getPrisma } from "@/lib/prisma";
 import { getAuthenticatedWorker } from "@/lib/auth";
+import { evaluateAttendance } from "@/lib/attendance-rules";
+import { formatDateJakarta } from "@/lib/date";
 
 export async function POST(req: Request) {
   try {
@@ -21,7 +23,9 @@ export async function POST(req: Request) {
     }
 
     const clockTime = timestamp ? new Date(timestamp) : new Date();
-    const today = clockTime.toISOString().split("T")[0];
+    const today = formatDateJakarta(clockTime);
+
+    const evaluation = evaluateAttendance(clockTime);
 
     const alreadyDone = await prisma.attendance.findFirst({
       where: { workerId: worker.id, date: today, clockOutAt: { not: null } },
@@ -60,6 +64,11 @@ export async function POST(req: Request) {
         clockInLat: lat,
         clockInLng: lng,
         clockInAt: clockTime,
+        shiftType: evaluation.shiftType,
+        scheduledStartAt: evaluation.scheduledStartAt,
+        latenessSeconds: evaluation.latenessSeconds,
+        attendanceStatus: evaluation.attendanceStatus,
+        payStatus: evaluation.payStatus,
       },
     });
 

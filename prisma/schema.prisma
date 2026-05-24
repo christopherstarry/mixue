@@ -17,18 +17,23 @@ model Worker {
 }
 
 model Attendance {
-  id            Int       @id @default(autoincrement())
-  workerId      Int
-  date          String
-  clockInAt     DateTime  @default(now())
-  clockInPhoto  String
-  clockInLat    Float?
-  clockInLng    Float?
-  clockOutAt    DateTime?
-  clockOutPhoto String?
-  clockOutLat   Float?
-  clockOutLng   Float?
-  worker        Worker    @relation(fields: [workerId], references: [id])
+  id                Int       @id @default(autoincrement())
+  workerId          Int
+  date              String
+  clockInAt         DateTime  @default(now())
+  clockInPhoto      String
+  clockInLat        Float?
+  clockInLng        Float?
+  clockOutAt        DateTime?
+  clockOutPhoto     String?
+  clockOutLat       Float?
+  clockOutLng       Float?
+  shiftType         String?
+  scheduledStartAt  DateTime?
+  latenessSeconds   Int?
+  attendanceStatus  String?
+  payStatus         String?
+  worker            Worker    @relation(fields: [workerId], references: [id])
 
   @@index([workerId])
   @@index([date])

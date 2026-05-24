@@ -44,12 +44,13 @@ export default function WorkerLoginPage() {
           <p className="text-gray-500 text-sm mt-1">Absensi Karyawan</p>
         </div>
 
-        <form onSubmit={handleSubmit}>
+        <form action="/api/worker/login" method="post" onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Username
             </label>
             <input
+              name="username"
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
@@ -64,6 +65,7 @@ export default function WorkerLoginPage() {
               Password
             </label>
             <input
+              name="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}

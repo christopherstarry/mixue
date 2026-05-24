@@ -21,11 +21,6 @@ export default function ClockPage() {
     return () => clearInterval(timer);
   }, []);
 
-  useEffect(() => {
-    checkStatus();
-    getLocation();
-  }, []);
-
   const checkStatus = async () => {
     try {
       const res = await fetch("/api/clock/status");
@@ -39,7 +34,8 @@ export default function ClockPage() {
       if (data.clockInAt) {
         setClockInAt(new Date(data.clockInAt).toLocaleTimeString());
       }
-    } catch {
+    } catch (e) {
+      console.error("Check status error:", e);
       router.push("/");
     }
   };
@@ -52,6 +48,15 @@ export default function ClockPage() {
       );
     }
   };
+
+  useEffect(() => {
+    const startup = window.setTimeout(() => {
+      checkStatus();
+      getLocation();
+    }, 0);
+
+    return () => window.clearTimeout(startup);
+  }, []);
 
   const openCamera = () => {
     fileInputRef.current?.click();

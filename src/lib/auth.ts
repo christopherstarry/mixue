@@ -20,7 +20,7 @@ export async function createWorkerSession(workerId: number) {
   const cookieStore = await cookies();
   cookieStore.set("worker_id", String(workerId), {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 12,
@@ -42,7 +42,7 @@ export async function createAdminSession() {
   const cookieStore = await cookies();
   cookieStore.set("admin_logged_in", "1", {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 12,

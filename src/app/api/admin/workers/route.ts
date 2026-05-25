@@ -26,7 +26,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { name, username, password } = await req.json();
+    const { name, username, password, weeklyDayOffs } = await req.json();
 
     if (!name || !username || !password) {
       return NextResponse.json(
@@ -46,7 +46,12 @@ export async function POST(req: Request) {
     const hashed = await hashPassword(password);
 
     const worker = await prisma.worker.create({
-      data: { name, username, password: hashed },
+      data: {
+        name,
+        username,
+        password: hashed,
+        weeklyDayOffs: weeklyDayOffs !== undefined ? weeklyDayOffs : 1,
+      },
     });
 
     return NextResponse.json({ success: true, worker });
@@ -63,12 +68,13 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, name, username, password, isActive } = await req.json();
+    const { id, name, username, password, isActive, weeklyDayOffs } = await req.json();
 
     const data: any = {};
     if (name) data.name = name;
     if (username) data.username = username;
     if (isActive !== undefined) data.isActive = isActive;
+    if (weeklyDayOffs !== undefined) data.weeklyDayOffs = weeklyDayOffs;
     if (password) {
       data.password = await hashPassword(password);
     }

@@ -57,7 +57,7 @@ export async function GET(req: Request) {
 
     const workers = await prisma.worker.findMany({
       where: { isActive: true },
-      select: { id: true, name: true },
+      select: { id: true, name: true, weeklyDayOffs: true },
       orderBy: { name: "asc" },
     });
 

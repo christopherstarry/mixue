@@ -11,9 +11,10 @@ model Worker {
   name      String
   username  String        @unique
   password  String
-  isActive  Boolean       @default(true)
-  createdAt DateTime      @default(now())
-  attendances Attendance[]
+  isActive      Boolean       @default(true)
+  weeklyDayOffs Int           @default(1)
+  createdAt     DateTime      @default(now())
+  attendances   Attendance[]
 }
 
 model Attendance {

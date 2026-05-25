@@ -22,6 +22,7 @@ import {
 interface Worker {
   id: number;
   name: string;
+  weeklyDayOffs: number;
 }
 
 interface Attendance {
@@ -83,6 +84,12 @@ export default function AdminReportPage() {
       setAttendances(data.attendances);
 
       const totalDays = getPastDaysInPeriod(period.start, period.end).length;
+      const weeksInPeriod = totalDays / 7;
+      const dayOffsMap: Record<number, number> = {};
+      for (const w of data.workers) {
+        dayOffsMap[w.id] = w.weeklyDayOffs;
+      }
+
       const grouped: Record<number, WorkerSummary> = {};
 
       for (const a of data.attendances) {
@@ -119,7 +126,8 @@ export default function AdminReportPage() {
         const workerDays = data.attendances.filter(
           (a: Attendance) => a.workerId === s.workerId
         ).length;
-        s.absent = totalDays - workerDays;
+        const expectedDayOffs = Math.round(dayOffsMap[s.workerId] * weeksInPeriod);
+        s.absent = Math.max(0, totalDays - workerDays - expectedDayOffs);
       }
 
       setSummaries(Object.values(grouped).sort((a, b) => a.workerName.localeCompare(b.workerName)));

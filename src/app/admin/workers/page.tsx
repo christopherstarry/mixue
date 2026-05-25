@@ -8,6 +8,7 @@ interface Worker {
   name: string;
   username: string;
   isActive: boolean;
+  weeklyDayOffs: number;
   createdAt: string;
 }
 
@@ -20,6 +21,7 @@ export default function WorkersPage() {
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [weeklyDayOffs, setWeeklyDayOffs] = useState(1);
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
@@ -48,6 +50,7 @@ export default function WorkersPage() {
     setName("");
     setUsername("");
     setPassword("");
+    setWeeklyDayOffs(1);
     setError("");
     setShowForm(true);
   };
@@ -57,6 +60,7 @@ export default function WorkersPage() {
     setName(w.name);
     setUsername(w.username);
     setPassword("");
+    setWeeklyDayOffs(w.weeklyDayOffs);
     setError("");
     setShowForm(true);
   };
@@ -68,7 +72,7 @@ export default function WorkersPage() {
 
     try {
       const method = editing ? "PUT" : "POST";
-      const body: any = { name, username };
+      const body: any = { name, username, weeklyDayOffs };
       if (editing) {
         body.id = editing.id;
         if (password) body.password = password;
@@ -172,7 +176,7 @@ export default function WorkersPage() {
                     required
                   />
                 </div>
-                <div className="mb-4">
+                <div className="mb-3">
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Password {editing && "(leave blank to keep current)"}
                   </label>
@@ -183,6 +187,20 @@ export default function WorkersPage() {
                     className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
                     required={!editing}
                   />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Day offs per week
+                  </label>
+                  <select
+                    value={weeklyDayOffs}
+                    onChange={(e) => setWeeklyDayOffs(Number(e.target.value))}
+                    className="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-400 text-gray-800 bg-white"
+                  >
+                    {[0, 1, 2, 3, 4, 5, 6].map((n) => (
+                      <option key={n} value={n}>{n}</option>
+                    ))}
+                  </select>
                 </div>
                 {error && (
                   <p className="text-red-500 text-sm mb-4">{error}</p>
@@ -225,7 +243,7 @@ export default function WorkersPage() {
                   <p className={`font-medium ${w.isActive ? "text-gray-800" : "text-gray-400 line-through"}`}>
                     {w.name}
                   </p>
-                  <p className="text-sm text-gray-500">@{w.username}</p>
+                  <p className="text-sm text-gray-500">@{w.username} &middot; {w.weeklyDayOffs} day(s) off/week</p>
                 </div>
                 <div className="flex gap-2 items-center">
                   <button

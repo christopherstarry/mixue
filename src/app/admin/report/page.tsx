@@ -46,6 +46,7 @@ interface WorkerSummary {
   late: number;
   absent: number;
   totalPresent: number;
+  workingDays: number;
 }
 
 function statusBadgeClass(status: AttendanceStatus): string {
@@ -66,7 +67,6 @@ export default function AdminReportPage() {
   const [summaries, setSummaries] = useState<WorkerSummary[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [expandedWorker, setExpandedWorker] = useState<number | null>(null);
-  const [totalPeriodDays, setTotalPeriodDays] = useState(0);
 
   useEffect(() => {
     fetchReport();
@@ -87,7 +87,6 @@ export default function AdminReportPage() {
 
       const allDays = getDaysInPeriod(period.start, period.end).length;
       const pastDays = getPastDaysInPeriod(period.start, period.end).length;
-      const weeksInPeriod = pastDays / 7;
       const dayOffsMap: Record<number, number> = {};
       for (const w of data.workers) {
         dayOffsMap[w.id] = w.weeklyDayOffs;
@@ -97,6 +96,7 @@ export default function AdminReportPage() {
 
       for (const a of data.attendances) {
         if (!grouped[a.workerId]) {
+          const dayOffs = dayOffsMap[a.workerId] || 1;
           grouped[a.workerId] = {
             workerId: a.worker.id,
             workerName: a.worker.name,
@@ -104,6 +104,7 @@ export default function AdminReportPage() {
             late: 0,
             absent: 0,
             totalPresent: 0,
+            workingDays: allDays - Math.round(dayOffs * allDays / 7),
           };
         }
         if (a.attendanceStatus === "on_time") grouped[a.workerId].onTime++;
@@ -113,6 +114,7 @@ export default function AdminReportPage() {
 
       for (const w of data.workers) {
         if (!grouped[w.id]) {
+          const dayOffs = dayOffsMap[w.id] || 1;
           grouped[w.id] = {
             workerId: w.id,
             workerName: w.name,
@@ -120,10 +122,12 @@ export default function AdminReportPage() {
             late: 0,
             absent: 0,
             totalPresent: 0,
+            workingDays: allDays - Math.round(dayOffs * allDays / 7),
           };
         }
       }
 
+      const weeksInPeriod = pastDays / 7;
       for (const key of Object.keys(grouped)) {
         const s = grouped[Number(key)];
         const workerDays = data.attendances.filter(
@@ -132,8 +136,6 @@ export default function AdminReportPage() {
         const expectedDayOffs = Math.round(dayOffsMap[s.workerId] * weeksInPeriod);
         s.absent = Math.max(0, pastDays - workerDays - expectedDayOffs);
       }
-
-      setTotalPeriodDays(allDays);
 
       setSummaries(Object.values(grouped).sort((a, b) => a.workerName.localeCompare(b.workerName)));
     } catch (e) {
@@ -267,7 +269,7 @@ export default function AdminReportPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-gray-700">
-                      {totalPeriodDays}
+                      {s.workingDays}
                     </td>
                   </tr>
                 ))}

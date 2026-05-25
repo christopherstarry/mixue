@@ -14,20 +14,29 @@ export async function GET(req: Request) {
     const month = searchParams.get("month");
     const year = searchParams.get("year");
     const workerId = searchParams.get("workerId");
+    const startDateParam = searchParams.get("startDate");
+    const endDateParam = searchParams.get("endDate");
 
-    if (!month || !year) {
-      return NextResponse.json(
-        { error: "Month and year are required" },
-        { status: 400 }
-      );
+    let startDate: string, endDate: string;
+
+    if (startDateParam && endDateParam) {
+      startDate = startDateParam;
+      endDate = endDateParam;
+    } else {
+      if (!month || !year) {
+        return NextResponse.json(
+          { error: "Month and year are required" },
+          { status: 400 }
+        );
+      }
+
+      const m = parseInt(month);
+      const y = parseInt(year);
+      startDate = `${y}-${String(m).padStart(2, "0")}-01`;
+
+      const lastDay = new Date(y, m, 0).getDate();
+      endDate = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
     }
-
-    const m = parseInt(month);
-    const y = parseInt(year);
-    const startDate = `${y}-${String(m).padStart(2, "0")}-01`;
-
-    const lastDay = new Date(y, m, 0).getDate();
-    const endDate = `${y}-${String(m).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
     const where: {
       date: { gte: string; lte: string };

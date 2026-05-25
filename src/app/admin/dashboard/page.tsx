@@ -112,6 +112,12 @@ export default function AdminDashboardPage() {
         </div>
         <div className="flex gap-3 items-center">
           <a
+            href="/admin/report"
+            className="text-sm text-blue-600 hover:text-blue-800"
+          >
+            Payroll Report
+          </a>
+          <a
             href="/admin/workers"
             className="text-sm text-blue-600 hover:text-blue-800"
           >

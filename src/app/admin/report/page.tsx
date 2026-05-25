@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   getPayrollPeriod,
+  getDaysInPeriod,
   getPastDaysInPeriod,
   formatPeriodLabel,
 } from "@/lib/payroll-period";
@@ -65,6 +66,7 @@ export default function AdminReportPage() {
   const [summaries, setSummaries] = useState<WorkerSummary[]>([]);
   const [attendances, setAttendances] = useState<Attendance[]>([]);
   const [expandedWorker, setExpandedWorker] = useState<number | null>(null);
+  const [totalPeriodDays, setTotalPeriodDays] = useState(0);
 
   useEffect(() => {
     fetchReport();
@@ -83,8 +85,9 @@ export default function AdminReportPage() {
       const data = await res.json();
       setAttendances(data.attendances);
 
-      const totalDays = getPastDaysInPeriod(period.start, period.end).length;
-      const weeksInPeriod = totalDays / 7;
+      const allDays = getDaysInPeriod(period.start, period.end).length;
+      const pastDays = getPastDaysInPeriod(period.start, period.end).length;
+      const weeksInPeriod = pastDays / 7;
       const dayOffsMap: Record<number, number> = {};
       for (const w of data.workers) {
         dayOffsMap[w.id] = w.weeklyDayOffs;
@@ -127,8 +130,10 @@ export default function AdminReportPage() {
           (a: Attendance) => a.workerId === s.workerId
         ).length;
         const expectedDayOffs = Math.round(dayOffsMap[s.workerId] * weeksInPeriod);
-        s.absent = Math.max(0, totalDays - workerDays - expectedDayOffs);
+        s.absent = Math.max(0, pastDays - workerDays - expectedDayOffs);
       }
+
+      setTotalPeriodDays(allDays);
 
       setSummaries(Object.values(grouped).sort((a, b) => a.workerName.localeCompare(b.workerName)));
     } catch (e) {
@@ -262,7 +267,7 @@ export default function AdminReportPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-center text-sm text-gray-700">
-                      {s.onTime + s.late + s.absent}
+                      {totalPeriodDays}
                     </td>
                   </tr>
                 ))}

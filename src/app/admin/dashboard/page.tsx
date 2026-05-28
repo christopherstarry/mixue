@@ -75,7 +75,7 @@ export default function AdminDashboardPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/attendance?month=${month}&year=${year}&workerId=${workerId}`
+        `/api/admin/attendance?month=${month}&year=${year}&workerId=${workerId}&_t=${Date.now()}`
       );
       if (res.status === 401) {
         router.push("/admin/login");

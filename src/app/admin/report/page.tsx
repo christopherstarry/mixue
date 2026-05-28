@@ -76,7 +76,7 @@ export default function AdminReportPage() {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/admin/attendance?startDate=${period.start}&endDate=${period.end}`
+        `/api/admin/attendance?startDate=${period.start}&endDate=${period.end}&_t=${Date.now()}`
       );
       if (res.status === 401) {
         router.push("/admin/login");

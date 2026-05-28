@@ -13,7 +13,9 @@ export async function GET() {
       orderBy: { name: "asc" },
     });
 
-    return NextResponse.json({ workers });
+    return NextResponse.json({ workers }, {
+      headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+    });
   } catch {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }

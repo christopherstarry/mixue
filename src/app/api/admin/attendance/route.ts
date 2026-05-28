@@ -72,7 +72,9 @@ export async function GET(req: Request) {
       };
     });
 
-    return NextResponse.json({ attendances: enriched, workers });
+    return NextResponse.json({ attendances: enriched, workers }, {
+      headers: { "Cache-Control": "no-cache, no-store, must-revalidate" },
+    });
   } catch (error) {
     console.error("Attendance fetch error:", error);
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });

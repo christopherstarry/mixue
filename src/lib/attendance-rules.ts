@@ -219,6 +219,18 @@ export function payLabel(payStatus: PayStatus): string {
 
 export function resolveAttendanceFields(attendance: {
   clockInAt: Date | string;
+  scheduledStartAt?: Date | string | null;
+  latenessSeconds?: number | null;
+  attendanceStatus?: string | null;
+  payStatus?: string | null;
 }): AttendanceEvaluation {
+  if (attendance.attendanceStatus && attendance.payStatus && attendance.latenessSeconds !== null && attendance.latenessSeconds !== undefined && attendance.scheduledStartAt) {
+    return {
+      scheduledStartAt: new Date(attendance.scheduledStartAt),
+      latenessSeconds: attendance.latenessSeconds,
+      attendanceStatus: attendance.attendanceStatus as AttendanceStatus,
+      payStatus: attendance.payStatus as PayStatus,
+    };
+  }
   return evaluateAttendance(new Date(attendance.clockInAt));
 }
